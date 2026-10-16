@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+  <title>anonychater</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234d7cfe' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.4.0/dist/protobuf.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="my-identity">
+          <div class="my-avatar" id="my-avatar"></div>
+          <div class="my-info">
+            <span class="my-name" id="my-name">连接中…</span>
+            <div class="my-actions">
+              <button id="rename-btn" class="rename-btn" title="随机换一个新马甲">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M16 3h5v5"/>
+                  <path d="M4 20L21 3"/>
+                  <path d="M21 16v5h-5"/>
+                  <path d="M15 15l6 6"/>
+                  <path d="M4 4l5 5"/>
+                </svg>
+                <span>换马甲</span>
+              </button>
+              <span class="online-badge">
+                <span class="online-dot"></span>
+                <span class="online-text"><span id="online-count">--</span> 人</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button id="theme-toggle" class="icon-btn" title="切换主题" aria-label="切换主题">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="messages-wrap">
+      <div id="sticky-header" class="sticky-header hidden"></div>
+      <main id="messages" class="messages"></main>
+    </div>
+
+    <button id="scroll-bottom-btn" class="scroll-bottom-btn hidden" aria-label="有新消息，回到最新">
+      <span class="new-msg-text">新消息</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5v14M19 12l-7 7-7-7"/>
+      </svg>
+    </button>
+
+    <div id="reply-bar" class="reply-bar hidden">
+      <div class="reply-bar-content">
+        <span class="reply-bar-label">回复</span>
+        <span id="reply-bar-preview" class="reply-bar-preview"></span>
+      </div>
+      <button id="reply-cancel" class="icon-btn small" aria-label="取消回复">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <footer class="composer">
+      <div class="composer-input-wrap">
+        <textarea id="input" rows="1" placeholder="说点什么…" maxlength="2000"></textarea>
+        <div class="composer-actions">
+          <button id="image-btn" class="icon-btn" title="发送图片" aria-label="发送图片">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <path d="M21 15l-5-5L5 21"/>
+            </svg>
+          </button>
+          <input type="file" id="image-input" accept="image/*" hidden>
+          <button id="send-btn" class="send-btn" aria-label="发送">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div id="image-lightbox" class="lightbox hidden">
+    <img id="lightbox-img" alt="预览">
+  </div>
+
+  <div id="refresh-modal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-title">确定要刷新页面吗？</div>
+      <div class="modal-desc">刷新后本次聊天记录和当前马甲都会丢失，且不可恢复。聊天室目前也不提供历史消息回看。</div>
+      <div class="modal-actions">
+        <button id="refresh-cancel" class="modal-btn">取消</button>
+        <button id="refresh-confirm" class="modal-btn primary">确定刷新</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

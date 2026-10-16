@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package chat;
+option go_package = "anonychater/proto";
+
+enum MessageType {
+  MESSAGE = 0;
+  JOIN    = 1;
+  LEAVE   = 2;
+  RENAME  = 3;
+  SYSTEM  = 4;
+}
+
+message ChatMessage {
+  string message_id  = 1;
+  uint64 seq         = 2;
+  MessageType type   = 3;
+  string sender_id   = 4;
+  string sender_name = 5;
+  int64  timestamp   = 6;
+  string content     = 7;
+  bytes  image_data  = 8;
+
+  string reply_to           = 9;
+  string reply_to_sender_id = 10;
+  string reply_to_preview   = 11;
+
+  string avatar_svg = 12;  // 仅 JOIN / RENAME 消息填充
+}
